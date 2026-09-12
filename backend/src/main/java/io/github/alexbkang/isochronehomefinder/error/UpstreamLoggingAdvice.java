@@ -9,6 +9,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 
 @RestControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -19,6 +20,16 @@ public class UpstreamLoggingAdvice {
   @ExceptionHandler({RestClientException.class, UpstreamException.class})
   ProblemDetail log(Exception e) {
     log.error("Upstream request failed: {}", e.getMessage(), e);
-    return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_GATEWAY, "Temporarily unavailable.");
+    return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_GATEWAY, detail(e));
+  }
+
+  private static String detail(Exception e) {
+    if (e instanceof RestClientResponseException rse) {
+      return "Upstream returned HTTP "
+          + rse.getStatusCode().value()
+          + ": "
+          + rse.getResponseBodyAsString();
+    }
+    return e.getMessage();
   }
 }
