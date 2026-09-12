@@ -10,8 +10,6 @@ import java.util.Optional;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.LineString;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestClientResponseException;
 import tools.jackson.databind.JsonNode;
 
 public class RealtyListingRepository implements ListingRepository {
@@ -42,31 +40,19 @@ public class RealtyListingRepository implements ListingRepository {
   }
 
   private List<Listing> fetch(String polygon) {
-    JsonNode root;
-    try {
-      root =
-          Optional.ofNullable(
-                  rest.get()
-                      .uri(
-                          REALTYAPI_ENDPOINT,
-                          builder ->
-                              builder
-                                  .queryParam("polygon", polygon)
-                                  .queryParam("listingStatus", LISTING_STATUS_FOR_SALE)
-                                  .build())
-                      .retrieve()
-                      .body(JsonNode.class))
-              .orElseThrow(() -> new UpstreamException("realtyapi returned an empty response"));
-    } catch (RestClientResponseException e) {
-      throw new UpstreamException(
-          "realtyapi returned HTTP "
-              + e.getStatusCode().value()
-              + ": "
-              + e.getResponseBodyAsString(),
-          e);
-    } catch (RestClientException e) {
-      throw new UpstreamException("realtyapi request failed: " + e.getMessage(), e);
-    }
+    var root =
+        Optional.ofNullable(
+                rest.get()
+                    .uri(
+                        REALTYAPI_ENDPOINT,
+                        builder ->
+                            builder
+                                .queryParam("polygon", polygon)
+                                .queryParam("listingStatus", LISTING_STATUS_FOR_SALE)
+                                .build())
+                    .retrieve()
+                    .body(JsonNode.class))
+            .orElseThrow(() -> new UpstreamException("realtyapi returned an empty response"));
     return extract(root);
   }
 

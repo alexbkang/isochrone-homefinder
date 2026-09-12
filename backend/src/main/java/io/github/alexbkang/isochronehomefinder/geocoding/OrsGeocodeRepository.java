@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestClientResponseException;
 import tools.jackson.databind.JsonNode;
 
 public class OrsGeocodeRepository implements GeocodeRepository {
@@ -34,38 +32,26 @@ public class OrsGeocodeRepository implements GeocodeRepository {
 
   private List<Hit> fetchHits(String endpoint, String text, int limit, Double lon, Double lat) {
     var focused = lon != null && lat != null;
-    JsonNode root;
-    try {
-      root =
-          Optional.ofNullable(
-                  rest.get()
-                      .uri(
-                          endpoint,
-                          builder -> {
+    var root =
+        Optional.ofNullable(
+                rest.get()
+                    .uri(
+                        endpoint,
+                        builder -> {
+                          builder
+                              .queryParam("text", text)
+                              .queryParam("size", limit)
+                              .queryParam("boundary.country", COUNTRY);
+                          if (focused) {
                             builder
-                                .queryParam("text", text)
-                                .queryParam("size", limit)
-                                .queryParam("boundary.country", COUNTRY);
-                            if (focused) {
-                              builder
-                                  .queryParam("focus.point.lon", lon)
-                                  .queryParam("focus.point.lat", lat);
-                            }
-                            return builder.build();
-                          })
-                      .retrieve()
-                      .body(JsonNode.class))
-              .orElseThrow(() -> new UpstreamException("ORS geocode returned an empty response"));
-    } catch (RestClientResponseException e) {
-      throw new UpstreamException(
-          "ORS geocode returned HTTP "
-              + e.getStatusCode().value()
-              + ": "
-              + e.getResponseBodyAsString(),
-          e);
-    } catch (RestClientException e) {
-      throw new UpstreamException("ORS geocode request failed: " + e.getMessage(), e);
-    }
+                                .queryParam("focus.point.lon", lon)
+                                .queryParam("focus.point.lat", lat);
+                          }
+                          return builder.build();
+                        })
+                    .retrieve()
+                    .body(JsonNode.class))
+            .orElseThrow(() -> new UpstreamException("ORS geocode returned an empty response"));
     return root.path("features")
         .valueStream()
         .map(OrsGeocodeRepository::toHit)

@@ -7,8 +7,6 @@ import java.util.Optional;
 import org.locationtech.jts.geom.Geometry;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestClientResponseException;
 import tools.jackson.databind.JsonNode;
 
 public class OrsIsochroneRepository implements IsochroneRepository {
@@ -26,25 +24,17 @@ public class OrsIsochroneRepository implements IsochroneRepository {
 
   @Override
   public Geometry fetchIsochrone(double lng, double lat, long rangeSeconds) {
-    JsonNode root;
-    try {
-      root =
-          Optional.ofNullable(
-                  rest.post()
-                      .uri(ORS_ENDPOINT)
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .body(
-                          new IsochroneRequest(
-                              List.of(new double[] {lng, lat}), new long[] {rangeSeconds}))
-                      .retrieve()
-                      .body(JsonNode.class))
-              .orElseThrow(() -> new UpstreamException("ORS returned an empty response"));
-    } catch (RestClientResponseException e) {
-      throw new UpstreamException(
-          "ORS returned HTTP " + e.getStatusCode().value() + ": " + e.getResponseBodyAsString(), e);
-    } catch (RestClientException e) {
-      throw new UpstreamException("ORS request failed: " + e.getMessage(), e);
-    }
+    var root =
+        Optional.ofNullable(
+                rest.post()
+                    .uri(ORS_ENDPOINT)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(
+                        new IsochroneRequest(
+                            List.of(new double[] {lng, lat}), new long[] {rangeSeconds}))
+                    .retrieve()
+                    .body(JsonNode.class))
+            .orElseThrow(() -> new UpstreamException("ORS returned an empty response"));
     // "features" can be empty and "geometry" can be null.
     var geometry = root.path("features").path(0).path("geometry");
     if (!geometry.isObject()) {
