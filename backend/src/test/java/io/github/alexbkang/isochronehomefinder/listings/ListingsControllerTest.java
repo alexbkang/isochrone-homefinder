@@ -1,7 +1,5 @@
 package io.github.alexbkang.isochronehomefinder.listings;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -36,8 +34,7 @@ class ListingsControllerTest {
 
   private static Listing listing(double lon, double lat) {
     return new Listing(
-        1, lat, lon, 0,
-        null, null, null, null, null, null, null, null, null, null, null, null,
+        1, lat, lon, 0, null, null, null, null, null, null, null, null, null, null, null, null,
         List.of());
   }
 
@@ -73,14 +70,18 @@ class ListingsControllerTest {
     var mvc = mvc(repository);
     // First call computes and caches; the repeat (same key, even a different geometry string
     // for the same search) must be served without touching realty again.
-    mvc.perform(post("/listings?key=abc").contentType(MediaType.APPLICATION_JSON).content(REGION_POLY))
+    mvc.perform(
+            post("/listings?key=abc").contentType(MediaType.APPLICATION_JSON).content(REGION_POLY))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(1));
     var movedGeometry =
         "{\"type\":\"Polygon\",\"coordinates\":[["
             + "[-118.4,34.0],[-118.3,34.0],[-118.3,34.1],[-118.2,34.1],[-118.2,34.2],[-118.4,34.2],[-118.4,34.0]]"
             + "]}";
-    mvc.perform(post("/listings?key=abc").contentType(MediaType.APPLICATION_JSON).content(movedGeometry))
+    mvc.perform(
+            post("/listings?key=abc")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(movedGeometry))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(1));
     verify(repository, times(1)).findWithin(any());
@@ -137,16 +138,13 @@ class ListingsControllerTest {
   }
 
   @Test
-  void upstreamFailureIsGeneric502AndDoesNotLeakProviderText() throws Exception {
+  void upstreamFailureIs502AndSurfacesProviderText() throws Exception {
     var repository = mock(ListingRepository.class);
     when(repository.findWithin(any()))
         .thenThrow(new UpstreamException("realtyapi upstream exploded"));
     mvc(repository)
         .perform(post("/listings").contentType(MediaType.APPLICATION_JSON).content(REGION_POLY))
         .andExpect(status().isBadGateway())
-        .andExpect(
-            jsonPath("$.detail")
-                .value("Temporarily unavailable."))
-        .andExpect(jsonPath("$.detail").value(not(containsString("realtyapi"))));
+        .andExpect(jsonPath("$.detail").value("realtyapi upstream exploded"));
   }
 }

@@ -8,14 +8,15 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
-import io.github.alexbkang.isochronehomefinder.geometry.GeoJson;
 import io.github.alexbkang.isochronehomefinder.error.UpstreamException;
+import io.github.alexbkang.isochronehomefinder.geometry.GeoJson;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 import tools.jackson.databind.json.JsonMapper;
 
 class OrsIsochroneRepositoryTest {
@@ -91,7 +92,7 @@ class OrsIsochroneRepositoryTest {
         .andRespond(withSuccess(EMPTY_FEATURE_COLLECTION, MediaType.APPLICATION_JSON));
 
     var e = assertThrows(UpstreamException.class, () -> cs.client.fetchIsochrone(1.0, 1.0, 600));
-    assertTrue(e.detailForLogs().contains("no isochrone polygon"));
+    assertTrue(e.getMessage().contains("no isochrone polygon"));
   }
 
   @Test
@@ -102,7 +103,7 @@ class OrsIsochroneRepositoryTest {
         .andRespond(withSuccess(NULL_GEOMETRY, MediaType.APPLICATION_JSON));
 
     var e = assertThrows(UpstreamException.class, () -> cs.client.fetchIsochrone(1.0, 1.0, 600));
-    assertTrue(e.detailForLogs().contains("no isochrone polygon"));
+    assertTrue(e.getMessage().contains("no isochrone polygon"));
   }
 
   @Test
@@ -115,9 +116,11 @@ class OrsIsochroneRepositoryTest {
                 .body("bad upstream")
                 .contentType(MediaType.APPLICATION_JSON));
 
-    var e = assertThrows(UpstreamException.class, () -> cs.client.fetchIsochrone(1.0, 1.0, 600));
-    assertTrue(e.detailForLogs().contains("500"));
-    assertTrue(e.detailForLogs().contains("bad upstream"));
+    var e =
+        assertThrows(
+            RestClientResponseException.class, () -> cs.client.fetchIsochrone(1.0, 1.0, 600));
+    assertTrue(e.getMessage().contains("500"));
+    assertTrue(e.getMessage().contains("bad upstream"));
   }
 
   @Test
@@ -128,6 +131,6 @@ class OrsIsochroneRepositoryTest {
         .andRespond(withSuccess("", MediaType.APPLICATION_JSON));
 
     var e = assertThrows(UpstreamException.class, () -> cs.client.fetchIsochrone(1.0, 1.0, 600));
-    assertTrue(e.detailForLogs().contains("empty response"));
+    assertTrue(e.getMessage().contains("empty response"));
   }
 }

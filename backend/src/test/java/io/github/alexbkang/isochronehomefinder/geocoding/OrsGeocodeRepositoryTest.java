@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
 class OrsGeocodeRepositoryTest {
 
@@ -141,9 +142,10 @@ class OrsGeocodeRepositoryTest {
                 .body("bad upstream")
                 .contentType(MediaType.APPLICATION_JSON));
 
-    var e = assertThrows(UpstreamException.class, () -> cs.client.search("x", null, null));
-    assertTrue(e.detailForLogs().contains("500"));
-    assertTrue(e.detailForLogs().contains("bad upstream"));
+    var e =
+        assertThrows(RestClientResponseException.class, () -> cs.client.search("x", null, null));
+    assertTrue(e.getMessage().contains("500"));
+    assertTrue(e.getMessage().contains("bad upstream"));
   }
 
   @Test
@@ -154,7 +156,7 @@ class OrsGeocodeRepositoryTest {
         .andRespond(withSuccess("", MediaType.APPLICATION_JSON));
 
     var e = assertThrows(UpstreamException.class, () -> cs.client.search("x", null, null));
-    assertTrue(e.detailForLogs().contains("empty response"));
+    assertTrue(e.getMessage().contains("empty response"));
   }
 
   @Test

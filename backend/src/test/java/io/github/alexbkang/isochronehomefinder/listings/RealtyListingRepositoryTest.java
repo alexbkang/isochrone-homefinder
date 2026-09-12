@@ -22,14 +22,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
 class RealtyListingRepositoryTest {
 
   private static final String ENDPOINT = RealtyListingRepository.REALTYAPI_ENDPOINT;
   private static final GeometryFactory GEOMETRY = new GeometryFactory();
 
-  private record ClientAndServer(
-      RealtyListingRepository client, MockRestServiceServer server) {}
+  private record ClientAndServer(RealtyListingRepository client, MockRestServiceServer server) {}
 
   private static ClientAndServer clientAndServer() {
     var builder = RestClient.builder();
@@ -187,7 +187,8 @@ class RealtyListingRepositoryTest {
         .expect(requestTo(Matchers.containsString(ENDPOINT + "?polygon=")))
         .andRespond(withSuccess(BODY, MediaType.APPLICATION_JSON));
 
-    var region = GEOMETRY.createMultiPolygon(new Polygon[] {square(-118.4, -118.3), square(-117.8, -117.6)});
+    var region =
+        GEOMETRY.createMultiPolygon(new Polygon[] {square(-118.4, -118.3), square(-117.8, -117.6)});
     var got = cs.client.findWithin(region);
     cs.server.verify();
     assertEquals(2, got.size(), "one query per ring, both results concatenated");
@@ -203,8 +204,10 @@ class RealtyListingRepositoryTest {
                 .body("{\"error\":\"monthly quota\"}")
                 .contentType(MediaType.APPLICATION_JSON));
 
-    var e = assertThrows(UpstreamException.class, () -> cs.client.findWithin(square(-118.4, -118.3)));
-    assertTrue(e.detailForLogs().contains("{\"error\":\"monthly quota\"}"));
+    var e =
+        assertThrows(
+            RestClientResponseException.class, () -> cs.client.findWithin(square(-118.4, -118.3)));
+    assertTrue(e.getMessage().contains("{\"error\":\"monthly quota\"}"));
   }
 
   @Test
@@ -214,7 +217,8 @@ class RealtyListingRepositoryTest {
         .expect(requestTo(Matchers.containsString(ENDPOINT)))
         .andRespond(withSuccess("", MediaType.APPLICATION_JSON));
 
-    var e = assertThrows(UpstreamException.class, () -> cs.client.findWithin(square(-118.4, -118.3)));
-    assertTrue(e.detailForLogs().contains("empty response"));
+    var e =
+        assertThrows(UpstreamException.class, () -> cs.client.findWithin(square(-118.4, -118.3)));
+    assertTrue(e.getMessage().contains("empty response"));
   }
 }
