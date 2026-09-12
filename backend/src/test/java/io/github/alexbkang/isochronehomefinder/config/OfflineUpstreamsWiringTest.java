@@ -1,7 +1,7 @@
 package io.github.alexbkang.isochronehomefinder.config;
 
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import io.github.alexbkang.isochronehomefinder.geocoding.GeocodeRepository;
 import io.github.alexbkang.isochronehomefinder.geocoding.OfflineGeocodeRepository;

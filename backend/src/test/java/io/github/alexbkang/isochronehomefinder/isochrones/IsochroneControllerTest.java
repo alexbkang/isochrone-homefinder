@@ -7,8 +7,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import io.github.alexbkang.isochronehomefinder.geometry.GeoJson;
 import io.github.alexbkang.isochronehomefinder.error.ProblemDetailsTestAdvice;
+import io.github.alexbkang.isochronehomefinder.geometry.GeoJson;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;

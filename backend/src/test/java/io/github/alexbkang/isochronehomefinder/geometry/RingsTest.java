@@ -45,7 +45,8 @@ class RingsTest {
 
   @Test
   void nonPolygonalGeometryIsRejected() {
-    var line = GEOMETRY.createLineString(new Coordinate[] {new Coordinate(0, 0), new Coordinate(1, 1)});
+    var line =
+        GEOMETRY.createLineString(new Coordinate[] {new Coordinate(0, 0), new Coordinate(1, 1)});
     var e = assertThrows(ResponseStatusException.class, () -> Rings.outerRings(line));
     assertEquals(HttpStatus.BAD_REQUEST, e.getStatusCode());
     assertTrue(e.getReason().contains("LineString"));

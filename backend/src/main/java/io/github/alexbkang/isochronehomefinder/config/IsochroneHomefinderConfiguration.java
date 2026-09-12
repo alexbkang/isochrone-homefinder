@@ -8,6 +8,7 @@ import io.github.alexbkang.isochronehomefinder.listings.ListingRepository;
 import io.github.alexbkang.isochronehomefinder.listings.RealtyListingRepository;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.net.http.HttpClient;
 import java.time.Duration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -60,7 +61,8 @@ class IsochroneHomefinderConfiguration {
   }
 
   private static RestClient rest(Builder builder, String authHeader, String key, Duration timeout) {
-    var factory = new JdkClientHttpRequestFactory();
+    var httpClient = HttpClient.newBuilder().connectTimeout(timeout).build();
+    var factory = new JdkClientHttpRequestFactory(httpClient);
     factory.setReadTimeout(timeout);
     return builder.clone().requestFactory(factory).defaultHeader(authHeader, key).build();
   }

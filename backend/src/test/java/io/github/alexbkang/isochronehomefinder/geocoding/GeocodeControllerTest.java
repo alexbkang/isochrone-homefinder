@@ -7,8 +7,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import io.github.alexbkang.isochronehomefinder.geocoding.GeocodeRepository.Hit;
 import io.github.alexbkang.isochronehomefinder.error.ProblemDetailsTestAdvice;
+import io.github.alexbkang.isochronehomefinder.geocoding.GeocodeRepository.Hit;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -72,10 +72,7 @@ class GeocodeControllerTest {
         .thenReturn(Optional.of(new Hit("Austin", "Texas", -97.74, 30.27)));
     mvc(repository)
         .perform(
-            get("/geocode")
-                .param("text", "austin")
-                .param("lon", "-97.74")
-                .param("lat", "30.27"))
+            get("/geocode").param("text", "austin").param("lon", "-97.74").param("lat", "30.27"))
         .andExpect(status().isOk());
   }
 
