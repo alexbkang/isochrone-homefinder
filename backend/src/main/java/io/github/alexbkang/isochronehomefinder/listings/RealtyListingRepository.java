@@ -1,7 +1,7 @@
 package io.github.alexbkang.isochronehomefinder.listings;
 
-import io.github.alexbkang.isochronehomefinder.geometry.Rings;
 import io.github.alexbkang.isochronehomefinder.error.UpstreamException;
+import io.github.alexbkang.isochronehomefinder.geometry.Rings;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.ArrayList;

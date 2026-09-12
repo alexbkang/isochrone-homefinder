@@ -22,7 +22,6 @@ public class UpstreamException extends ErrorResponseException {
   }
 
   private static ProblemDetail problem() {
-    return ProblemDetail.forStatusAndDetail(
-        HttpStatus.BAD_GATEWAY, "Temporarily unavailable.");
+    return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_GATEWAY, "Temporarily unavailable.");
   }
 }

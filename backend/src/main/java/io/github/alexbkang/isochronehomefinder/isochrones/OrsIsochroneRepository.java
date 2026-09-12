@@ -1,7 +1,7 @@
 package io.github.alexbkang.isochronehomefinder.isochrones;
 
-import io.github.alexbkang.isochronehomefinder.geometry.GeoJson;
 import io.github.alexbkang.isochronehomefinder.error.UpstreamException;
+import io.github.alexbkang.isochronehomefinder.geometry.GeoJson;
 import java.util.List;
 import org.locationtech.jts.geom.Geometry;
 import org.springframework.http.MediaType;
