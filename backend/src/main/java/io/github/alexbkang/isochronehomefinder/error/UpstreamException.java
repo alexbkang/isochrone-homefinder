@@ -6,19 +6,19 @@ import org.springframework.web.ErrorResponseException;
 
 public class UpstreamException extends ErrorResponseException {
 
-  private final String detailForLogs;
+  private final String detail;
 
-  public UpstreamException(String detailForLogs) {
-    this(detailForLogs, null);
+  public UpstreamException(String detail) {
+    this(detail, null);
   }
 
-  public UpstreamException(String detailForLogs, Throwable cause) {
+  public UpstreamException(String detail, Throwable cause) {
     super(HttpStatus.BAD_GATEWAY, problem(), cause);
-    this.detailForLogs = detailForLogs;
+    this.detail = detail;
   }
 
-  public String detailForLogs() {
-    return detailForLogs;
+  public String detail() {
+    return detail;
   }
 
   private static ProblemDetail problem() {

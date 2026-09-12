@@ -37,21 +37,25 @@ public class OrsGeocodeRepository implements GeocodeRepository {
     JsonNode root;
     try {
       root =
-          rest.get()
-              .uri(
-                  endpoint,
-                  builder -> {
-                    builder
-                        .queryParam("text", text)
-                        .queryParam("size", limit)
-                        .queryParam("boundary.country", COUNTRY);
-                    if (focused) {
-                      builder.queryParam("focus.point.lon", lon).queryParam("focus.point.lat", lat);
-                    }
-                    return builder.build();
-                  })
-              .retrieve()
-              .body(JsonNode.class);
+          Optional.ofNullable(
+                  rest.get()
+                      .uri(
+                          endpoint,
+                          builder -> {
+                            builder
+                                .queryParam("text", text)
+                                .queryParam("size", limit)
+                                .queryParam("boundary.country", COUNTRY);
+                            if (focused) {
+                              builder
+                                  .queryParam("focus.point.lon", lon)
+                                  .queryParam("focus.point.lat", lat);
+                            }
+                            return builder.build();
+                          })
+                      .retrieve()
+                      .body(JsonNode.class))
+              .orElseThrow(() -> new UpstreamException("ORS geocode returned an empty response"));
     } catch (RestClientResponseException e) {
       throw new UpstreamException(
           "ORS geocode returned HTTP "
@@ -61,9 +65,6 @@ public class OrsGeocodeRepository implements GeocodeRepository {
           e);
     } catch (RestClientException e) {
       throw new UpstreamException("ORS geocode request failed: " + e.getMessage(), e);
-    }
-    if (root == null) {
-      throw new UpstreamException("ORS geocode returned an empty response");
     }
     return root.path("features")
         .valueStream()

@@ -3,6 +3,7 @@ package io.github.alexbkang.isochronehomefinder.isochrones;
 import io.github.alexbkang.isochronehomefinder.error.UpstreamException;
 import io.github.alexbkang.isochronehomefinder.geometry.GeoJson;
 import java.util.List;
+import java.util.Optional;
 import org.locationtech.jts.geom.Geometry;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
@@ -28,21 +29,21 @@ public class OrsIsochroneRepository implements IsochroneRepository {
     JsonNode root;
     try {
       root =
-          rest.post()
-              .uri(ORS_ENDPOINT)
-              .contentType(MediaType.APPLICATION_JSON)
-              .body(
-                  new IsochroneRequest(List.of(new double[] {lng, lat}), new long[] {rangeSeconds}))
-              .retrieve()
-              .body(JsonNode.class);
+          Optional.ofNullable(
+                  rest.post()
+                      .uri(ORS_ENDPOINT)
+                      .contentType(MediaType.APPLICATION_JSON)
+                      .body(
+                          new IsochroneRequest(
+                              List.of(new double[] {lng, lat}), new long[] {rangeSeconds}))
+                      .retrieve()
+                      .body(JsonNode.class))
+              .orElseThrow(() -> new UpstreamException("ORS returned an empty response"));
     } catch (RestClientResponseException e) {
       throw new UpstreamException(
           "ORS returned HTTP " + e.getStatusCode().value() + ": " + e.getResponseBodyAsString(), e);
     } catch (RestClientException e) {
       throw new UpstreamException("ORS request failed: " + e.getMessage(), e);
-    }
-    if (root == null) {
-      throw new UpstreamException("ORS returned an empty response");
     }
     // "features" can be empty and "geometry" can be null.
     var geometry = root.path("features").path(0).path("geometry");

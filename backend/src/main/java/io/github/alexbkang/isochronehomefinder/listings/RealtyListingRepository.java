@@ -6,6 +6,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.LineString;
 import org.springframework.web.client.RestClient;
@@ -44,16 +45,18 @@ public class RealtyListingRepository implements ListingRepository {
     JsonNode root;
     try {
       root =
-          rest.get()
-              .uri(
-                  REALTYAPI_ENDPOINT,
-                  builder ->
-                      builder
-                          .queryParam("polygon", polygon)
-                          .queryParam("listingStatus", LISTING_STATUS_FOR_SALE)
-                          .build())
-              .retrieve()
-              .body(JsonNode.class);
+          Optional.ofNullable(
+                  rest.get()
+                      .uri(
+                          REALTYAPI_ENDPOINT,
+                          builder ->
+                              builder
+                                  .queryParam("polygon", polygon)
+                                  .queryParam("listingStatus", LISTING_STATUS_FOR_SALE)
+                                  .build())
+                      .retrieve()
+                      .body(JsonNode.class))
+              .orElseThrow(() -> new UpstreamException("realtyapi returned an empty response"));
     } catch (RestClientResponseException e) {
       throw new UpstreamException(
           "realtyapi returned HTTP "
@@ -63,9 +66,6 @@ public class RealtyListingRepository implements ListingRepository {
           e);
     } catch (RestClientException e) {
       throw new UpstreamException("realtyapi request failed: " + e.getMessage(), e);
-    }
-    if (root == null) {
-      throw new UpstreamException("realtyapi returned an empty response");
     }
     return extract(root);
   }

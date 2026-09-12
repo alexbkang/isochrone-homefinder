@@ -16,7 +16,7 @@ public class UpstreamLoggingAdvice {
 
   @ExceptionHandler(UpstreamException.class)
   ProblemDetail log(UpstreamException e) {
-    log.error("Upstream request failed: {}", e.detailForLogs(), e);
+    log.error("Upstream request failed: {}", e.detail(), e);
     return e.getBody();
   }
 }
