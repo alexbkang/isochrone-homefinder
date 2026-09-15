@@ -22,15 +22,11 @@ import org.springframework.web.client.RestClient.Builder;
 
 @Validated
 @ConfigurationProperties("ors")
-record OrsProperties(
-    @NotBlank(message = "Missing required env var ORS_KEY") String key,
-    @NotNull Duration timeout) {}
+record OrsProperties(@NotBlank String key, @NotNull Duration timeout) {}
 
 @Validated
 @ConfigurationProperties("realtyapi")
-record RealtyProperties(
-    @NotBlank(message = "Missing required env var REALTYAPI_KEY") String key,
-    @NotNull Duration timeout) {}
+record RealtyProperties(@NotBlank String key, @NotNull Duration timeout) {}
 
 @Configuration
 @Profile("!offline")

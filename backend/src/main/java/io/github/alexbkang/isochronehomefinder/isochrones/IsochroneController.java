@@ -1,8 +1,8 @@
 package io.github.alexbkang.isochronehomefinder.isochrones;
 
 import io.github.alexbkang.isochronehomefinder.geometry.GeoJson;
+import jakarta.validation.Valid;
 import java.util.List;
-import org.jspecify.annotations.NonNull;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +22,7 @@ public class IsochroneController {
   public record RegionResponse(JsonNode region, List<JsonNode> zones) {}
 
   @PostMapping
-  public RegionResponse region(@RequestBody @NonNull List<List<Anchor>> groups) {
+  public RegionResponse region(@RequestBody @Valid List<List<@Valid Anchor>> groups) {
     var result = service.composeReachableRegion(groups);
     return switch (result) {
       case ReachableRegion.Found found ->

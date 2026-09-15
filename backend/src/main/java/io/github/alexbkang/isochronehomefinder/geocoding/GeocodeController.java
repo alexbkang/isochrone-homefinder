@@ -1,6 +1,9 @@
 package io.github.alexbkang.isochronehomefinder.geocoding;
 
 import io.github.alexbkang.isochronehomefinder.geocoding.GeocodeRepository.Hit;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,40 +26,26 @@ public class GeocodeController {
 
   @GetMapping
   public Hit geocode(
-      @RequestParam String text,
+      @RequestParam @NotBlank String text,
       @RequestParam(required = false) Double lon,
       @RequestParam(required = false) Double lat) {
-    var query = validateText(text);
     var focus = focus(lon, lat);
     return repository
-        .search(query, focus)
+        .search(text, focus)
         .orElseThrow(
             () ->
                 new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "No location matched \"" + query + "\"."));
+                    HttpStatus.NOT_FOUND, "No location matched \"" + text + "\"."));
   }
 
   @GetMapping("/autocomplete")
   public List<Hit> autocomplete(
-      @RequestParam String text,
-      @RequestParam int limit,
+      @RequestParam @NotBlank String text,
+      @RequestParam @Min(1) @Max(MAX_LIMIT) int limit,
       @RequestParam(required = false) Double lon,
       @RequestParam(required = false) Double lat) {
-    var query = validateText(text);
     var focus = focus(lon, lat);
-    if (limit < 1 || limit > MAX_LIMIT) {
-      throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, "limit must be between 1 and " + MAX_LIMIT);
-    }
-    return repository.autocomplete(query, limit, focus);
-  }
-
-  private static String validateText(String text) {
-    var query = text.trim();
-    if (query.isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "text must not be blank");
-    }
-    return query;
+    return repository.autocomplete(text, limit, focus);
   }
 
   private static Focus focus(Double lon, Double lat) {

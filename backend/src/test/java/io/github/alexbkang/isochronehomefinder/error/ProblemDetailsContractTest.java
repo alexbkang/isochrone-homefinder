@@ -52,11 +52,11 @@ class ProblemDetailsContractTest {
   }
 
   @Test
-  void ourBadRequestIsProblemDetail() throws Exception {
+  void beanValidationFailureIsProblemDetail() throws Exception {
     var response = get("/geocode?text=");
     assertEquals(400, response.statusCode());
     assertTrue(response.body().contains("\"status\":400"), response.body());
-    assertTrue(response.body().contains("text must not be blank"), response.body());
+    assertTrue(response.body().contains("Validation failure"), response.body());
   }
 
   @Test

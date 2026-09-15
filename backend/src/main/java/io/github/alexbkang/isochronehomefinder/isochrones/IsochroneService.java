@@ -97,10 +97,6 @@ public class IsochroneService {
                     HttpStatus.BAD_REQUEST,
                     "Every place needs a latitude, a longitude, and a drive limit.");
               }
-              if (place.min() < 1 || place.min() > 60) {
-                throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "Each drive limit must be 1-60 minutes.");
-              }
               return place;
             })
         .filter(anchor -> seen.add(anchor.lat() + "," + anchor.lng()))
