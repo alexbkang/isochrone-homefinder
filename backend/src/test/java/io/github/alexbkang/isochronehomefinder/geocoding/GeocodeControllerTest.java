@@ -26,7 +26,7 @@ class GeocodeControllerTest {
   @Test
   void geocodeReturnsTheSingleHit() throws Exception {
     var repository = mock(GeocodeRepository.class);
-    when(repository.search("austin", null, null))
+    when(repository.search("austin", new Focus.None()))
         .thenReturn(Optional.of(new Hit("Austin", "Texas", -97.74, 30.27)));
     mvc(repository)
         .perform(get("/geocode").param("text", "austin"))
@@ -39,7 +39,7 @@ class GeocodeControllerTest {
   @Test
   void geocodeWithNoMatchIs404() throws Exception {
     var repository = mock(GeocodeRepository.class);
-    when(repository.search("nowhere", null, null)).thenReturn(Optional.empty());
+    when(repository.search("nowhere", new Focus.None())).thenReturn(Optional.empty());
     mvc(repository)
         .perform(get("/geocode").param("text", "nowhere"))
         .andExpect(status().isNotFound())
@@ -49,7 +49,7 @@ class GeocodeControllerTest {
   @Test
   void autocompleteReturnsHits() throws Exception {
     var repository = mock(GeocodeRepository.class);
-    when(repository.autocomplete("austin", 5, null, null))
+    when(repository.autocomplete("austin", 5, new Focus.None()))
         .thenReturn(List.of(new Hit("Austin", "Texas", -97.74, 30.27)));
     mvc(repository)
         .perform(get("/geocode/autocomplete").param("text", "austin").param("limit", "5"))
@@ -68,7 +68,7 @@ class GeocodeControllerTest {
   @Test
   void focusIsPassedThrough() throws Exception {
     var repository = mock(GeocodeRepository.class);
-    when(repository.search("austin", -97.74, 30.27))
+    when(repository.search("austin", new Focus.At(-97.74, 30.27)))
         .thenReturn(Optional.of(new Hit("Austin", "Texas", -97.74, 30.27)));
     mvc(repository)
         .perform(

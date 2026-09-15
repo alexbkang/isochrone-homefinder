@@ -7,7 +7,7 @@ public interface GeocodeRepository {
 
   record Hit(String name, String region, double lon, double lat) {}
 
-  Optional<Hit> search(String text, Double lon, Double lat);
+  Optional<Hit> search(String text, Focus focus);
 
-  List<Hit> autocomplete(String text, int limit, Double lon, Double lat);
+  List<Hit> autocomplete(String text, int limit, Focus focus);
 }

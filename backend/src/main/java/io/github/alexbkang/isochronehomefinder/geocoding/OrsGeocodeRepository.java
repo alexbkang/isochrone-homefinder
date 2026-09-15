@@ -21,17 +21,16 @@ public class OrsGeocodeRepository implements GeocodeRepository {
   }
 
   @Override
-  public Optional<Hit> search(String text, Double lon, Double lat) {
-    return fetchHits(GEOCODE_ENDPOINT, text, 1, lon, lat).stream().findFirst();
+  public Optional<Hit> search(String text, Focus focus) {
+    return fetchHits(GEOCODE_ENDPOINT, text, 1, focus).stream().findFirst();
   }
 
   @Override
-  public List<Hit> autocomplete(String text, int limit, Double lon, Double lat) {
-    return fetchHits(AUTOCOMPLETE_ENDPOINT, text, limit, lon, lat);
+  public List<Hit> autocomplete(String text, int limit, Focus focus) {
+    return fetchHits(AUTOCOMPLETE_ENDPOINT, text, limit, focus);
   }
 
-  private List<Hit> fetchHits(String endpoint, String text, int limit, Double lon, Double lat) {
-    var focused = lon != null && lat != null;
+  private List<Hit> fetchHits(String endpoint, String text, int limit, Focus focus) {
     var root =
         Optional.ofNullable(
                 rest.get()
@@ -42,10 +41,10 @@ public class OrsGeocodeRepository implements GeocodeRepository {
                               .queryParam("text", text)
                               .queryParam("size", limit)
                               .queryParam("boundary.country", COUNTRY);
-                          if (focused) {
+                          if (focus instanceof Focus.At at) {
                             builder
-                                .queryParam("focus.point.lon", lon)
-                                .queryParam("focus.point.lat", lat);
+                                .queryParam("focus.point.lon", at.lon())
+                                .queryParam("focus.point.lat", at.lat());
                           }
                           return builder.build();
                         })

@@ -61,7 +61,7 @@ class ProblemDetailsContractTest {
 
   @Test
   void ourNotFoundIsProblemDetail() throws Exception {
-    when(geocodeRepository.search(anyString(), any(), any())).thenReturn(Optional.empty());
+    when(geocodeRepository.search(anyString(), any())).thenReturn(Optional.empty());
 
     var response = get("/geocode?text=austin");
     assertEquals(404, response.statusCode(), response.body());
@@ -70,7 +70,7 @@ class ProblemDetailsContractTest {
 
   @Test
   void upstreamFailureIs502AndSurfacesProviderText(CapturedOutput output) throws Exception {
-    when(geocodeRepository.search(anyString(), any(), any()))
+    when(geocodeRepository.search(anyString(), any()))
         .thenThrow(new UpstreamException("ORS geocode returned HTTP 500: provider secret"));
 
     var response = get("/geocode?text=austin");

@@ -76,7 +76,7 @@ class OrsGeocodeRepositoryTest {
         .andExpect(method(HttpMethod.GET))
         .andRespond(withSuccess(FEATURES, MediaType.APPLICATION_JSON));
 
-    var hit = cs.client.search("austin", null, null).orElseThrow();
+    var hit = cs.client.search("austin", new Focus.None()).orElseThrow();
     cs.server.verify();
     assertEquals("Austin", hit.name());
     assertEquals("Texas", hit.region());
@@ -97,7 +97,7 @@ class OrsGeocodeRepositoryTest {
         .andExpect(method(HttpMethod.GET))
         .andRespond(withSuccess(FEATURES, MediaType.APPLICATION_JSON));
 
-    cs.client.search("austin", -97.74, 30.27);
+    cs.client.search("austin", new Focus.At(-97.74, 30.27));
     cs.server.verify();
   }
 
@@ -108,7 +108,7 @@ class OrsGeocodeRepositoryTest {
         .expect(requestTo(URI.create(ENDPOINT + "?text=austin&size=1&boundary.country=US")))
         .andRespond(withSuccess(FEATURES, MediaType.APPLICATION_JSON));
 
-    cs.client.search("austin", null, null);
+    cs.client.search("austin", new Focus.None());
     cs.server.verify();
   }
 
@@ -119,7 +119,7 @@ class OrsGeocodeRepositoryTest {
         .expect(requestTo(URI.create(ENDPOINT + "?text=zzz&size=1&boundary.country=US")))
         .andRespond(withSuccess(EMPTY, MediaType.APPLICATION_JSON));
 
-    assertTrue(cs.client.search("zzz", null, null).isEmpty());
+    assertTrue(cs.client.search("zzz", new Focus.None()).isEmpty());
   }
 
   @Test
@@ -129,7 +129,7 @@ class OrsGeocodeRepositoryTest {
         .expect(requestTo(URI.create(ENDPOINT + "?text=x&size=1&boundary.country=US")))
         .andRespond(withSuccess(SKIPS_BAD, MediaType.APPLICATION_JSON));
 
-    assertEquals("Austin", cs.client.search("x", null, null).orElseThrow().name());
+    assertEquals("Austin", cs.client.search("x", new Focus.None()).orElseThrow().name());
   }
 
   @Test
@@ -143,7 +143,8 @@ class OrsGeocodeRepositoryTest {
                 .contentType(MediaType.APPLICATION_JSON));
 
     var e =
-        assertThrows(RestClientResponseException.class, () -> cs.client.search("x", null, null));
+        assertThrows(
+            RestClientResponseException.class, () -> cs.client.search("x", new Focus.None()));
     assertTrue(e.getMessage().contains("500"));
     assertTrue(e.getMessage().contains("bad upstream"));
   }
@@ -155,7 +156,7 @@ class OrsGeocodeRepositoryTest {
         .expect(requestTo(URI.create(ENDPOINT + "?text=x&size=1&boundary.country=US")))
         .andRespond(withSuccess("", MediaType.APPLICATION_JSON));
 
-    var e = assertThrows(UpstreamException.class, () -> cs.client.search("x", null, null));
+    var e = assertThrows(UpstreamException.class, () -> cs.client.search("x", new Focus.None()));
     assertTrue(e.getMessage().contains("empty response"));
   }
 
@@ -167,7 +168,7 @@ class OrsGeocodeRepositoryTest {
         .andExpect(method(HttpMethod.GET))
         .andRespond(withSuccess(FEATURES, MediaType.APPLICATION_JSON));
 
-    var hits = cs.client.autocomplete("austin", 5, null, null);
+    var hits = cs.client.autocomplete("austin", 5, new Focus.None());
     cs.server.verify();
     assertEquals(2, hits.size());
     assertEquals("Austin", hits.get(0).name());

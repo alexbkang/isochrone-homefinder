@@ -24,8 +24,12 @@ public class IsochroneController {
   @PostMapping
   public RegionResponse region(@RequestBody @NonNull List<List<Anchor>> groups) {
     var result = service.composeReachableRegion(groups);
-    return new RegionResponse(
-        result.region() == null ? null : GeoJson.toJson(result.region()),
-        result.zones().stream().map(GeoJson::toJson).toList());
+    return switch (result) {
+      case ReachableRegion.Found found ->
+          new RegionResponse(
+              GeoJson.toJson(found.region()), found.zones().stream().map(GeoJson::toJson).toList());
+      case ReachableRegion.Empty empty ->
+          new RegionResponse(null, empty.zones().stream().map(GeoJson::toJson).toList());
+    };
   }
 }

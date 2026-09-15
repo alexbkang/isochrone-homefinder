@@ -12,12 +12,12 @@ public final class OfflineGeocodeRepository implements GeocodeRepository {
           new Hit("Santa Monica", "California", -118.4912, 34.0195));
 
   @Override
-  public Optional<Hit> search(String text, Double lon, Double lat) {
+  public Optional<Hit> search(String text, Focus focus) {
     return HITS.stream().findFirst();
   }
 
   @Override
-  public List<Hit> autocomplete(String text, int limit, Double lon, Double lat) {
+  public List<Hit> autocomplete(String text, int limit, Focus focus) {
     return HITS;
   }
 }

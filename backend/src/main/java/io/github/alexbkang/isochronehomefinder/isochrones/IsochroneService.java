@@ -18,8 +18,6 @@ public class IsochroneService {
   public static final int MAX_GROUPS = 6;
   public static final int MAX_OR = 5;
 
-  public record RegionResult(Geometry region, List<Geometry> zones) {}
-
   private final IsochroneRepository ors;
   private final ExecutorService pool =
       Executors.newFixedThreadPool(
@@ -34,14 +32,16 @@ public class IsochroneService {
     this.ors = ors;
   }
 
-  public RegionResult composeReachableRegion(List<List<Anchor>> request) {
+  public ReachableRegion composeReachableRegion(List<List<Anchor>> request) {
     var zones = new ArrayList<Geometry>();
     var it = normalize(request).iterator();
     var region = fetchParallelGroup(it.next(), zones);
     while (!region.isEmpty() && it.hasNext()) {
       region = region.intersection(fetchParallelGroup(it.next(), zones));
     }
-    return region.isEmpty() ? new RegionResult(null, zones) : new RegionResult(region, zones);
+    return region.isEmpty()
+        ? new ReachableRegion.Empty(zones)
+        : new ReachableRegion.Found(region, zones);
   }
 
   private Geometry fetchParallelGroup(List<Anchor> group, List<Geometry> zones) {
@@ -68,7 +68,7 @@ public class IsochroneService {
   }
 
   private static List<List<Anchor>> normalize(List<List<Anchor>> groups) {
-    if (groups == null || groups.isEmpty()) {
+    if (groups.isEmpty()) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST, "Supply at least one group of places.");
     }

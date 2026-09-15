@@ -1,8 +1,7 @@
 package io.github.alexbkang.isochronehomefinder.isochrones;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
@@ -65,7 +64,7 @@ class IsochroneServiceTest {
     var result =
         service.composeReachableRegion(
             List.of(List.of(place(0, 0, 20), place(0, 0, 20), place(0.6, 0, 20))));
-    assertNotNull(result.region());
+    assertInstanceOf(ReachableRegion.Found.class, result);
     assertEquals(2, result.zones().size());
     verify(ors, times(2)).fetchIsochrone(anyDouble(), anyDouble(), anyLong());
   }
@@ -77,7 +76,7 @@ class IsochroneServiceTest {
     var service = new IsochroneService(ors);
     var result =
         service.composeReachableRegion(List.of(List.of(place(0, 0, 20), place(0.6, 0, 20))));
-    assertNotNull(result.region());
+    assertInstanceOf(ReachableRegion.Found.class, result);
     assertEquals(2, result.zones().size());
   }
 
@@ -88,8 +87,8 @@ class IsochroneServiceTest {
     var service = new IsochroneService(ors);
     var result =
         service.composeReachableRegion(List.of(List.of(place(0, 0, 20), place(50, 50, 20))));
-    assertNotNull(result.region());
-    assertEquals("MultiPolygon", result.region().getGeometryType());
+    var found = assertInstanceOf(ReachableRegion.Found.class, result);
+    assertEquals("MultiPolygon", found.region().getGeometryType());
     assertEquals(2, result.zones().size());
   }
 
@@ -101,7 +100,7 @@ class IsochroneServiceTest {
     var result =
         service.composeReachableRegion(
             List.of(List.of(place(0, 0, 20)), List.of(place(0.5, 0, 20))));
-    assertNotNull(result.region());
+    assertInstanceOf(ReachableRegion.Found.class, result);
     assertEquals(2, result.zones().size());
   }
 
@@ -114,7 +113,7 @@ class IsochroneServiceTest {
         service.composeReachableRegion(
             List.of(
                 List.of(place(0, 0, 20)), List.of(place(50, 50, 20)), List.of(place(1, 1, 20))));
-    assertNull(result.region());
+    assertInstanceOf(ReachableRegion.Empty.class, result);
     assertEquals(2, result.zones().size());
 
     verify(ors, times(2)).fetchIsochrone(anyDouble(), anyDouble(), anyLong());
