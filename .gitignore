@@ -1,0 +1,15 @@
+# Frontend
+frontend/
+
+# Build outputs
+backend/build/
+backend/bin/
+backend/.gradle/
+
+# IDE
+backend/.classpath
+backend/.project
+backend/.settings/
+
+# OS
+.DS_Store
