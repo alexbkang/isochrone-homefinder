@@ -18,7 +18,7 @@ public class UpstreamLoggingAdvice {
 
   @ExceptionHandler({RestClientException.class, UpstreamException.class})
   ProblemDetail log(Exception e) {
-    log.error("Upstream request failed: {}", e.getMessage(), e);
+    log.error("Upstream request failed", e);
     return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_GATEWAY, e.getMessage());
   }
 }
